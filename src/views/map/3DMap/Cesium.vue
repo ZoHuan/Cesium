@@ -1,28 +1,25 @@
 <template>
     <div id="container" @click.stop="controlRotate"></div>
 </template>
-  
+
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, reactive, } from "vue";
+import { onBeforeUnmount, onMounted, reactive } from "vue";
 import * as Cesium from "cesium";
-import GlobeRotate from '@/utils/map/GlobeRotate';
-import { setInterval } from "timers";
+import GlobeRotate from "@/utils/map/GlobeRotate";
 
-
-
-const globeRotate = reactive<{ rotate: any, timer: any, state: boolean }>({
+const globeRotate = reactive<{ rotate: any; timer: any; state: boolean }>({
     rotate: null,
     timer: 0,
-    state: true
-})
+    state: true,
+});
 
 // 设置默认的视角为中国
-// Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
-//     89.5, // 西边经度
-//     20.4, // 南边维度
-//     110.4, // 东边经度
-//     61.2 // 北边维度
-// );
+Cesium.Camera.DEFAULT_VIEW_RECTANGLE = Cesium.Rectangle.fromDegrees(
+    89.5, // 西边经度
+    20.4, // 南边维度
+    110.4, // 东边经度
+    61.2 // 北边维度
+);
 
 onMounted(() => {
     Cesium.Ion.defaultAccessToken =
@@ -39,10 +36,10 @@ onMounted(() => {
         timeline: false, // 是否显示时间轴
         fullscreenButton: false, // 是否显示全屏按钮
 
-        terrainProvider: Cesium.createWorldTerrain({
-            requestVertexNormals: true,
-            requestWaterMask: true
-        })
+        // terrainProvider: Cesium.createWorldTerrain({
+        //     requestVertexNormals: true,
+        //     requestWaterMask: true,
+        // }),
     });
 
     // 隐藏cesiumLogo
@@ -55,45 +52,39 @@ onMounted(() => {
             globeRotate.state = true;
             globeRotate.rotate.start();
         }
-    }, 5000)
+    }, 5000);
 
     updateLighting(viewer);
-
-
 });
 
 onBeforeUnmount(() => {
     clearInterval(globeRotate.timer); //清除定时器
     globeRotate.timer = 0;
-})
-
+});
 
 const controlRotate = () => {
     globeRotate.rotate.stop();
     globeRotate.state = false;
-}
+};
 
 const updateLighting = (viewer: Cesium.Viewer) => {
-    viewer.scene.globe.enableLighting = true//必须开启光照效果，
-    var layer = viewer.scene.imageryLayers.addImageryProvider(
+    let layer = viewer.scene.imageryLayers.addImageryProvider(
         new Cesium.IonImageryProvider({ assetId: 3812 })
-    )
-    layer.dayAlpha = 0.0 //白天图层透明值
-    layer.nightAlpha = 1.0 //夜晚图层透明值
-    layer.brightness = 3.5 //图层发光亮度
+    );
+    layer.dayAlpha = 0.0; //白天图层透明值
+    layer.nightAlpha = 1.0; //夜晚图层透明值
+    layer.brightness = 3.5; //图层发光亮度
 
-    viewer.scene.globe.enableLighting = true;//打开光照
-    viewer.clock.shouldAnimate = true;//时间轴动画
-    viewer.clock.multiplier = 2000;//时间轴速度
+    viewer.scene.globe.enableLighting = true; //打开光照
+    viewer.clock.shouldAnimate = true; //时间轴动画
+    // viewer.clock.multiplier = 1000; //时间轴速度
     // nightLayer.dayAlpha = 0.0;
-}
-
+};
 </script>
-  
+
 <style lang="less" scoped>
 #container {
     width: 100%;
     height: 100%;
 }
 </style>
-  
